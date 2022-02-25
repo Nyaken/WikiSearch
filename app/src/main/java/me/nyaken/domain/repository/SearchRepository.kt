@@ -8,8 +8,6 @@ import me.nyaken.connector.Result
 class SearchRepository(
     private val connector: Request
 ) {
-    fun page(query: String) = connector.requestGET("/api/rest_v1/page/html/$query")
-
     suspend fun summary(query: String): Result<String> {
         return withContext(Dispatchers.IO) {
             connector.requestGET("/api/rest_v1/page/summary/$query")
