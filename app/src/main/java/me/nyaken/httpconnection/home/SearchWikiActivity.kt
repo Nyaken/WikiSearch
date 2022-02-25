@@ -9,17 +9,13 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.SearchView
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import me.nyaken.common.DETAIL_URL
-import me.nyaken.common.INTENT_DETAIL_URL
 import me.nyaken.common.INTENT_QUERY
 import me.nyaken.httpconnection.BaseActivity
-import me.nyaken.httpconnection.BuildConfig
 import me.nyaken.httpconnection.R
 import me.nyaken.httpconnection.databinding.ActivitySearchWikiBinding
 import me.nyaken.httpconnection.databinding.ItemWikiHeaderBinding
@@ -81,7 +77,7 @@ class SearchWikiActivity: BaseActivity<ActivitySearchWikiBinding>(R.layout.activ
                         this,
                         WikiDetailActivity::class.java
                     ).apply {
-                        putExtra(INTENT_DETAIL_URL, "${DETAIL_URL}${viewModel.query.value}")
+                        putExtra(INTENT_QUERY, viewModel.query.value)
                     }
                 )
             } else {

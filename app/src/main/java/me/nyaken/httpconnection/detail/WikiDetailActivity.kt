@@ -4,7 +4,8 @@ import android.view.MenuItem
 import android.webkit.WebChromeClient
 import android.webkit.WebViewClient
 import dagger.hilt.android.AndroidEntryPoint
-import me.nyaken.common.INTENT_DETAIL_URL
+import me.nyaken.common.DETAIL_URL
+import me.nyaken.common.INTENT_QUERY
 import me.nyaken.httpconnection.BaseActivity
 import me.nyaken.httpconnection.R
 import me.nyaken.httpconnection.databinding.ActivityWebDetailBinding
@@ -12,8 +13,8 @@ import me.nyaken.httpconnection.databinding.ActivityWebDetailBinding
 @AndroidEntryPoint
 class WikiDetailActivity: BaseActivity<ActivityWebDetailBinding>(R.layout.activity_web_detail) {
 
-    private val url: String? by lazy {
-        intent?.getStringExtra(INTENT_DETAIL_URL)
+    private val query: String? by lazy {
+        intent?.getStringExtra(INTENT_QUERY)
     }
 
     override fun viewBinding() = Unit
@@ -25,12 +26,13 @@ class WikiDetailActivity: BaseActivity<ActivityWebDetailBinding>(R.layout.activi
     override fun initLayout() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
+        supportActionBar?.title = query
 
         binding.webview.webChromeClient = WebChromeClient()
         binding.webview.webViewClient = WebViewClient()
 
-        url?.let {
-            binding.webview.loadUrl(it)
+        query?.let {
+            binding.webview.loadUrl("$DETAIL_URL$it")
         } ?: finish()
     }
 
