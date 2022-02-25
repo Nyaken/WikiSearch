@@ -18,8 +18,8 @@ class NetworkModule {
     ): Request {
         return Request.Builder()
             .url(BuildConfig.BASE_URL)
-            .connectTimeout(3000)
-            .readTimeOut(3000)
+            .connectTimeout(10000)
+            .readTimeOut(10000)
             .addHeader("Content-Type", "application/json")
             .build()
     }

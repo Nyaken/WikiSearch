@@ -3,6 +3,7 @@ package me.nyaken.connector
 import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.net.URL
 import java.net.URLEncoder
 import javax.net.ssl.HttpsURLConnection
@@ -41,18 +42,23 @@ class Request(
         writer.close()
         os.close()
 
-        if (conn.responseCode == HttpsURLConnection.HTTP_OK) {
-            val bufferReaderIn = BufferedReader(InputStreamReader(conn.inputStream))
-            val sb = StringBuffer("")
-            var line: String? = ""
-            while (bufferReaderIn.readLine().also { line = it } != null) {
-                sb.append(line)
-                break
+        return try {
+            if (conn.responseCode == HttpsURLConnection.HTTP_OK) {
+                val bufferReaderIn = BufferedReader(InputStreamReader(conn.inputStream))
+                val sb = StringBuffer("")
+                var line: String? = ""
+                while (bufferReaderIn.readLine().also { line = it } != null) {
+                    sb.append(line)
+                    break
+                }
+                bufferReaderIn.close()
+                Result.Success(sb.toString())
+            } else {
+                Result.Error(Exception("Cannot open HttpURLConnection"))
             }
-            bufferReaderIn.close()
-            return Result.Success(sb.toString())
+        } catch (e: SocketTimeoutException) {
+            Result.Error(Exception(e.message))
         }
-        return Result.Error(Exception("Cannot open HttpURLConnection"))
     }
 
     fun requestGET(
@@ -69,17 +75,21 @@ class Request(
             }
         }
 
-        return if (conn.responseCode == HttpURLConnection.HTTP_OK) {
-            val bufferReaderIn = BufferedReader(InputStreamReader(conn.inputStream))
-            var inputLine: String?
-            val response = StringBuffer()
-            while (bufferReaderIn.readLine().also { inputLine = it } != null) {
-                response.append(inputLine)
+        return try {
+            if (conn.responseCode == HttpURLConnection.HTTP_OK) {
+                val bufferReaderIn = BufferedReader(InputStreamReader(conn.inputStream))
+                var inputLine: String?
+                val response = StringBuffer()
+                while (bufferReaderIn.readLine().also { inputLine = it } != null) {
+                    response.append(inputLine)
+                }
+                bufferReaderIn.close()
+                Result.Success(response.toString())
+            } else {
+                Result.Error(Exception("Cannot open HttpURLConnection"))
             }
-            bufferReaderIn.close()
-            Result.Success(response.toString())
-        } else {
-            Result.Error(Exception("Cannot open HttpURLConnection"))
+        } catch (e: SocketTimeoutException) {
+            Result.Error(Exception(e.message))
         }
     }
 
