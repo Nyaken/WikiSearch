@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HttpConnection">
         <activity
-            android:name=".home.MainActivity"
+            android:name=".home.SearchWikiActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

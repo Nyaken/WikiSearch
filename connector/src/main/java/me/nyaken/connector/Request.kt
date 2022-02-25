@@ -55,7 +55,6 @@ class Request(
         return Result.Error(Exception("Cannot open HttpURLConnection"))
     }
 
-    @Throws(IOException::class)
     fun requestGET(
         path: String
     ): Result<String> {
