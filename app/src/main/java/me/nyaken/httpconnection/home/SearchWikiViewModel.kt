@@ -25,7 +25,7 @@ class SearchWikiViewModel @Inject constructor(
     val query: LiveData<String>
         get() = _query
     fun query(item: String) {
-        _query.value = item
+        _query.value = item.replace(" ", "_").trim()
     }
 
     private val _summary = MutableLiveData<SummaryResponse>()

@@ -1,9 +1,14 @@
 package me.nyaken.httpconnection.home
 
+import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
@@ -38,6 +43,10 @@ class SearchWikiActivity: BaseActivity<ActivitySearchWikiBinding>(R.layout.activ
     }
 
     override fun setupObserve() {
+        viewModel.query.observe(this, Observer {
+            supportActionBar?.title = it
+        })
+
         viewModel.summary.observe(this, Observer {
             initSummaryData(it)
 
@@ -53,6 +62,9 @@ class SearchWikiActivity: BaseActivity<ActivitySearchWikiBinding>(R.layout.activ
     }
 
     override fun initLayout() {
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+
         binding.swipeRefresh.setOnRefreshListener {
             onRefresh()
         }
@@ -79,7 +91,6 @@ class SearchWikiActivity: BaseActivity<ActivitySearchWikiBinding>(R.layout.activ
 
     override fun onRefresh() {
         adapter.clearItems()
-        viewModel.query("Google")
         getData()
     }
 
@@ -98,5 +109,37 @@ class SearchWikiActivity: BaseActivity<ActivitySearchWikiBinding>(R.layout.activ
         bindingSummary.item = item
         bindingSummary.root.tag = this.javaClass.simpleName + "header"
         binding.list.addHeaderView(bindingSummary.root)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.options_menu, menu)
+
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        (menu.findItem(R.id.search).actionView as SearchView).apply {
+            setSearchableInfo(searchManager.getSearchableInfo(componentName))
+            maxWidth = Integer.MAX_VALUE
+
+            setOnQueryTextListener(object: SearchView.OnQueryTextListener{
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    query?.let {
+                        viewModel.query(it)
+                        onRefresh()
+                    }
+                    return false
+                }
+
+                override fun onQueryTextChange(query: String?): Boolean = false
+
+            })
+        }
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == android.R.id.home) {
+            finish()
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
