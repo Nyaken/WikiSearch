@@ -6,9 +6,9 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class WikiData(
-    @SerializedName("displaytitle")
+    @SerializedName("title")
     val title: String,
-    @SerializedName("extract_html")
+    @SerializedName("extract")
     val extract: String,
     @SerializedName("thumbnail")
     val thumbnail: ThumbnailData

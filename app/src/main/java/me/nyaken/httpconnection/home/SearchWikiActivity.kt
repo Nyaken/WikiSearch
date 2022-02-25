@@ -1,5 +1,6 @@
 package me.nyaken.httpconnection.home
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
@@ -9,6 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import me.nyaken.common.INTENT_QUERY
 import me.nyaken.httpconnection.BaseActivity
 import me.nyaken.httpconnection.R
 import me.nyaken.httpconnection.databinding.ActivitySearchWikiBinding
@@ -24,6 +26,13 @@ class SearchWikiActivity: BaseActivity<ActivitySearchWikiBinding>(R.layout.activ
 
     private val adapter: SearchWikiAdapter = SearchWikiAdapter()
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.getStringExtra(INTENT_QUERY)?.let {
+            viewModel.query(it)
+        }
+    }
+
     override fun viewBinding() {
         binding.lifecycleOwner = this
     }
@@ -33,7 +42,7 @@ class SearchWikiActivity: BaseActivity<ActivitySearchWikiBinding>(R.layout.activ
             initSummaryData(it)
 
             lifecycleScope.launch {
-                viewModel.relatedData("Google")
+                viewModel.relatedData()
             }
         })
 
@@ -54,21 +63,29 @@ class SearchWikiActivity: BaseActivity<ActivitySearchWikiBinding>(R.layout.activ
                 Toast.makeText(this, "header", Toast.LENGTH_SHORT).show()
             } else {
                 val item: WikiData = adapter.getItem(position - 1)
-                Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show()
+                startActivity(
+                    Intent(
+                    this,
+                    SearchWikiActivity::class.java
+                    ).apply {
+                        putExtra(INTENT_QUERY, item.title)
+                    }
+                )
             }
         }
 
-        getData("Google")
+        getData()
     }
 
     override fun onRefresh() {
         adapter.clearItems()
-        getData("Stack")
+        viewModel.query("Google")
+        getData()
     }
 
-    private fun getData(query: String) {
+    private fun getData() {
         lifecycleScope.launch {
-            viewModel.searchData(query)
+            viewModel.searchData()
         }
     }
 

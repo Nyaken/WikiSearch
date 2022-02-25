@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import me.nyaken.connector.Request
+import me.nyaken.httpconnection.BuildConfig
 import javax.inject.Singleton
 
 @Module
@@ -16,7 +17,7 @@ class NetworkModule {
     fun provideClient(
     ): Request {
         return Request.Builder()
-            .url("https://en.wikipedia.org")
+            .url(BuildConfig.BASE_URL)
             .connectTimeout(3000)
             .readTimeOut(3000)
             .addHeader("Content-Type", "application/json")

@@ -21,6 +21,13 @@ class SearchWikiViewModel @Inject constructor(
     private val searchRepository: SearchRepository
 ): ViewModel() {
 
+    private val _query = MutableLiveData<String>()
+    val query: LiveData<String>
+        get() = _query
+    fun query(item: String) {
+        _query.value = item
+    }
+
     private val _summary = MutableLiveData<SummaryResponse>()
     val summary: LiveData<SummaryResponse>
         get() = _summary
@@ -37,33 +44,33 @@ class SearchWikiViewModel @Inject constructor(
         _related.postValue(item)
     }
 
-    suspend fun searchData(
-        query: String
-    ) {
+    suspend fun searchData() {
         viewModelScope.launch(Dispatchers.Default) {
-            when(val result = searchRepository.summary(query)) {
-                is Result.Success<String> -> {
-                    val res: SummaryResponse = Gson().fromJson(result.data, SummaryResponse::class.java)
-                    summary(res)
-                }
-                else -> {
+            query.value?.let {
+                when(val result = searchRepository.summary(it)) {
+                    is Result.Success<String> -> {
+                        val res: SummaryResponse = Gson().fromJson(result.data, SummaryResponse::class.java)
+                        summary(res)
+                    }
+                    else -> {
 
+                    }
                 }
             }
         }
     }
 
-    suspend fun relatedData(
-        query: String
-    ) {
+    suspend fun relatedData() {
         viewModelScope.launch(Dispatchers.Default) {
-            when(val result = searchRepository.related(query)) {
-                is Result.Success<String> -> {
-                    val res: RelatedResponse = Gson().fromJson(result.data, RelatedResponse::class.java)
-                    related(res.pages)
-                }
-                else -> {
+            query.value?.let {
+                when(val result = searchRepository.related(it)) {
+                    is Result.Success<String> -> {
+                        val res: RelatedResponse = Gson().fromJson(result.data, RelatedResponse::class.java)
+                        related(res.pages)
+                    }
+                    else -> {
 
+                    }
                 }
             }
         }
