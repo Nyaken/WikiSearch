@@ -15,11 +15,15 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import me.nyaken.common.DETAIL_URL
+import me.nyaken.common.INTENT_DETAIL_URL
 import me.nyaken.common.INTENT_QUERY
 import me.nyaken.httpconnection.BaseActivity
+import me.nyaken.httpconnection.BuildConfig
 import me.nyaken.httpconnection.R
 import me.nyaken.httpconnection.databinding.ActivitySearchWikiBinding
 import me.nyaken.httpconnection.databinding.ItemWikiHeaderBinding
+import me.nyaken.httpconnection.detail.WikiDetailActivity
 import me.nyaken.httpconnection.home.adapter.SearchWikiAdapter
 import me.nyaken.network.model.SummaryResponse
 import me.nyaken.network.model.WikiData
@@ -72,7 +76,14 @@ class SearchWikiActivity: BaseActivity<ActivitySearchWikiBinding>(R.layout.activ
         binding.list.adapter = adapter
         binding.list.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
             if(position == 0) {
-                Toast.makeText(this, "header", Toast.LENGTH_SHORT).show()
+                startActivity(
+                    Intent(
+                        this,
+                        WikiDetailActivity::class.java
+                    ).apply {
+                        putExtra(INTENT_DETAIL_URL, "${DETAIL_URL}${viewModel.query.value}")
+                    }
+                )
             } else {
                 val item: WikiData = adapter.getItem(position - 1)
                 startActivity(
