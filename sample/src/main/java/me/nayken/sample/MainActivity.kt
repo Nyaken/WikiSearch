@@ -2,7 +2,6 @@ package me.nayken.sample
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,7 +15,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val request: Request by lazy {
         Request.Builder()
-            .url("https://webhook.site/caeaf4a0-3407-4b8e-b7ab-277bc1a65bbe/").connectTimeout(10000)
+            .url("https://webhook.site/caeaf4a0-3407-4b8e-b7ab-277bc1a65bbe/")
+            .connectTimeout(10000)
             .readTimeOut(10000)
             .addHeader("Content-Type", "application/json")
             .addHeader("Accept", "application/json")
@@ -45,6 +45,17 @@ class MainActivity : AppCompatActivity() {
                 when(val response = requestPost()) {
                     is Result.Success<String> -> {
                         attachLog("POST", response.toString())
+                    }
+                    else -> {}
+                }
+            }
+        }
+
+        binding.buttonMultipartPost.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.Default) {
+                when(val response = requestPostMultipart()) {
+                    is Result.Success<String> -> {
+                        attachLog("MULTIPART POST", response.toString())
                     }
                     else -> {}
                 }
@@ -83,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun requestGet(): Result<String> {
         return withContext(Dispatchers.IO) {
-            request.requestGET(path = "get/test")
+            request.requestGET(path = "get/test").build()
         }
     }
 
@@ -97,25 +108,34 @@ class MainActivity : AppCompatActivity() {
                 path = "post/test",
                 postDataParams = params
             )
+                .build()
         }
     }
 
     private suspend fun requestPut(): Result<String> {
-        val params: JSONObject = JSONObject()
-        params.put("key1", "value1")
-        params.put("key2", "value2")
-
         return withContext(Dispatchers.IO) {
             request.requestPUT(
-                path = "put/test",
-                postDataParams = params
+                path = "put/test"
             )
+                .addParam("key1", "value1")
+                .addParam("key2", "value2")
+                .build()
         }
     }
 
     private suspend fun requestDELETE(): Result<String> {
         return withContext(Dispatchers.IO) {
             request.requestDELETE(path = "delete/test")
+        }
+            .build()
+    }
+
+    private suspend fun requestPostMultipart(): Result<String> {
+        return withContext(Dispatchers.IO) {
+            request.requestMultiPart(path = "multipart/test")
+                .addFormField(name = "key1", value = "value1")
+                .addFormField(name = "key2", value = "value2")
+                .build()
         }
     }
 }

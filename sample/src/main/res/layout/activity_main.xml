@@ -22,6 +22,12 @@
         android:text="REQUEST POST"/>
 
     <Button
+        android:id="@+id/button_multipart_post"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="REQUEST MULTIPART POST"/>
+
+    <Button
         android:id="@+id/button_put"
         android:layout_width="match_parent"
         android:layout_height="50dp"

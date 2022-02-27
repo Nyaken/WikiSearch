@@ -1,12 +1,13 @@
 package me.nyaken.connector
 
+import me.nyaken.connector.method.GetMethod
+import me.nyaken.connector.method.PostMethod
+import me.nyaken.connector.method.PostMultipartMethod
 import org.json.JSONObject
-import java.io.*
 import java.net.HttpURLConnection
-import java.net.SocketTimeoutException
 import java.net.URL
-import java.net.URLEncoder
-import javax.net.ssl.HttpsURLConnection
+import java.util.*
+import kotlin.collections.HashMap
 
 class Request(
     private val url: String?,
@@ -19,172 +20,76 @@ class Request(
 
     fun requestGET(
         path: String
-    ): Result<String> {
-        val conn: HttpURLConnection = URL("$url$path").openConnection() as HttpURLConnection
+    ): GetMethod {
+        val conn: HttpURLConnection = httpConnection(URL("$url$path"))
         conn.requestMethod = "GET"
-        conn.readTimeout = readTimeout ?: DEFAULT_TIMEOUT
-        conn.connectTimeout = connectTimeout ?: DEFAULT_TIMEOUT
         conn.doInput = true
         conn.doOutput = false
 
-        headers?.let { map ->
-            map.forEach {
-                conn.setRequestProperty(it.key, it.value)
-            }
-        }
-
-        return try {
-            if (conn.responseCode == HttpURLConnection.HTTP_OK) {
-                val bufferReaderIn = BufferedReader(InputStreamReader(conn.inputStream))
-                var inputLine: String?
-                val response = StringBuffer()
-                while (bufferReaderIn.readLine().also { inputLine = it } != null) {
-                    response.append(inputLine)
-                }
-                bufferReaderIn.close()
-                Result.Success(response.toString())
-            } else {
-                Result.Error(Exception("Cannot open HttpURLConnection"))
-            }
-        } catch (e: SocketTimeoutException) {
-            Result.Error(Exception(e.message))
-        }
+        return GetMethod(conn)
     }
 
     fun requestPOST(
         path: String,
-        postDataParams: JSONObject
-    ): Result<String> {
-        val conn: HttpURLConnection = URL("$url$path").openConnection() as HttpURLConnection
+        postDataParams: JSONObject? = null
+    ): PostMethod {
+        val conn: HttpURLConnection = httpConnection(URL("$url$path"))
         conn.requestMethod = "POST"
-        conn.readTimeout = readTimeout ?: DEFAULT_TIMEOUT
-        conn.connectTimeout = connectTimeout ?: DEFAULT_TIMEOUT
         conn.doInput = true
         conn.doOutput = true
 
-        headers?.let { map ->
-            map.forEach {
-                conn.setRequestProperty(it.key, it.value)
-            }
-        }
-
-        val os: OutputStream = conn.outputStream
-        val writer = BufferedWriter(OutputStreamWriter(os, "UTF-8"))
-        writer.write(encodeParams(postDataParams))
-        writer.flush()
-        writer.close()
-        os.close()
-
-        return try {
-            if (conn.responseCode == HttpsURLConnection.HTTP_OK) {
-                val bufferReaderIn = BufferedReader(InputStreamReader(conn.inputStream))
-                var inputLine: String?
-                val response = StringBuffer()
-                while (bufferReaderIn.readLine().also { inputLine = it } != null) {
-                    response.append(inputLine)
-                }
-                bufferReaderIn.close()
-                Result.Success(response.toString())
-            } else {
-                Result.Error(Exception("Cannot open HttpURLConnection"))
-            }
-        } catch (e: SocketTimeoutException) {
-            Result.Error(Exception(e.message))
-        }
+        return PostMethod(conn, postDataParams ?: JSONObject())
     }
 
     fun requestPUT(
         path: String,
-        postDataParams: JSONObject
-    ): Result<String> {
-        val conn: HttpURLConnection = URL("$url$path").openConnection() as HttpURLConnection
+        postDataParams: JSONObject? = null
+    ): PostMethod {
+        val conn: HttpURLConnection = httpConnection(URL("$url$path"))
         conn.requestMethod = "PUT"
-        conn.readTimeout = readTimeout ?: DEFAULT_TIMEOUT
-        conn.connectTimeout = connectTimeout ?: DEFAULT_TIMEOUT
         conn.doInput = true
         conn.doOutput = false
 
-        headers?.let { map ->
-            map.forEach {
-                conn.setRequestProperty(it.key, it.value)
-            }
-        }
-
-        val os: OutputStream = conn.outputStream
-        val writer = BufferedWriter(OutputStreamWriter(os, "UTF-8"))
-        writer.write(encodeParams(postDataParams))
-        writer.flush()
-        writer.close()
-        os.close()
-
-        return try {
-            if (conn.responseCode == HttpsURLConnection.HTTP_OK) {
-                val bufferReaderIn = BufferedReader(InputStreamReader(conn.inputStream))
-                var inputLine: String?
-                val response = StringBuffer()
-                while (bufferReaderIn.readLine().also { inputLine = it } != null) {
-                    response.append(inputLine)
-                }
-                bufferReaderIn.close()
-                Result.Success(response.toString())
-            } else {
-                Result.Error(Exception("Cannot open HttpURLConnection"))
-            }
-        } catch (e: SocketTimeoutException) {
-            Result.Error(Exception(e.message))
-        }
+        return PostMethod(conn, postDataParams ?: JSONObject())
     }
 
     fun requestDELETE(
         path: String
-    ): Result<String> {
-        val conn: HttpURLConnection = URL("$url$path").openConnection() as HttpURLConnection
+    ): GetMethod {
+        val conn: HttpURLConnection = httpConnection(URL("$url$path"))
         conn.requestMethod = "DELETE"
-        conn.readTimeout = readTimeout ?: DEFAULT_TIMEOUT
-        conn.connectTimeout = connectTimeout ?: DEFAULT_TIMEOUT
         conn.doInput = true
         conn.doOutput = false
+
+        return GetMethod(conn)
+    }
+
+    fun requestMultiPart(
+        path: String
+    ): PostMultipartMethod {
+        val boundary: String = UUID.randomUUID().toString()
+        val conn: HttpURLConnection = httpConnection(URL("$url$path"))
+        conn.requestMethod = "POST"
+        conn.doInput = true
+        conn.doOutput = true
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
+        return PostMultipartMethod(conn, boundary)
+    }
+
+    private fun httpConnection(
+        url: URL
+    ): HttpURLConnection {
+        val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
+        conn.readTimeout = readTimeout ?: DEFAULT_TIMEOUT
+        conn.connectTimeout = connectTimeout ?: DEFAULT_TIMEOUT
 
         headers?.let { map ->
             map.forEach {
                 conn.setRequestProperty(it.key, it.value)
             }
         }
-
-        return try {
-            if (conn.responseCode == HttpURLConnection.HTTP_OK) {
-                val bufferReaderIn = BufferedReader(InputStreamReader(conn.inputStream))
-                var inputLine: String?
-                val response = StringBuffer()
-                while (bufferReaderIn.readLine().also { inputLine = it } != null) {
-                    response.append(inputLine)
-                }
-                bufferReaderIn.close()
-                Result.Success(response.toString())
-            } else {
-                Result.Error(Exception("Cannot open HttpURLConnection"))
-            }
-        } catch (e: SocketTimeoutException) {
-            Result.Error(Exception(e.message))
-        }
+        return conn
     }
-
-    @Throws(IOException::class)
-    private fun encodeParams(params: JSONObject): String {
-        val result = StringBuilder()
-        var first = true
-        val itr = params.keys()
-        while (itr.hasNext()) {
-            val key = itr.next()
-            val value = params[key]
-            if (first) first = false else result.append("&")
-            result.append(URLEncoder.encode(key, "UTF-8"))
-            result.append("=")
-            result.append(URLEncoder.encode(value.toString(), "UTF-8"))
-        }
-        return result.toString()
-    }
-
 
     open class Builder {
         private var url: String? = null
