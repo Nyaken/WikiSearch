@@ -10,13 +10,13 @@ class SearchRepository(
 ) {
     suspend fun summary(query: String): Result<String> {
         return withContext(Dispatchers.IO) {
-            connector.requestGET("summary/$query")
+            connector.requestGET("summary/$query").build()
         }
     }
 
     suspend fun related(query: String): Result<String> {
         return withContext(Dispatchers.IO) {
-            connector.requestGET("related/$query")
+            connector.requestGET("related/$query").build()
         }
     }
 }
