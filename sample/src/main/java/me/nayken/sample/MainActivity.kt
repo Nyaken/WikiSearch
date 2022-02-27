@@ -3,6 +3,8 @@ package me.nayken.sample
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -15,8 +17,7 @@ import java.io.File
 import java.io.FileWriter
 
 class MainActivity : AppCompatActivity() {
-    private val testBasedUrl = "https://webhook.site/caeaf4a0-3407-4b8e-b7ab-277bc1a65bbe/"
-    //https://webhook.site/#!/caeaf4a0-3407-4b8e-b7ab-277bc1a65bbe/ecd25428-720e-400c-b481-1b83fa09e2e2/1
+    private val testBasedUrl = "http://postman-echo.com/"
 
     private lateinit var binding: ActivityMainBinding
 
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             lifecycleScope.launch(Dispatchers.Default) {
                 when(val response = requestGet()) {
                     is Result.Success<String> -> {
-                        attachLog("GET", response.toString())
+                        attachResponse(response.data)
                     }
                     else -> {}
                 }
@@ -51,7 +52,7 @@ class MainActivity : AppCompatActivity() {
             lifecycleScope.launch(Dispatchers.Default) {
                 when(val response = requestPost()) {
                     is Result.Success<String> -> {
-                        attachLog("POST", response.toString())
+                        attachResponse(response.data)
                     }
                     else -> {}
                 }
@@ -62,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             lifecycleScope.launch(Dispatchers.Default) {
                 when(val response = requestPostMultipart()) {
                     is Result.Success<String> -> {
-                        attachLog("MULTIPART POST", response.toString())
+                        attachResponse(response.data)
                     }
                     else -> {}
                 }
@@ -73,7 +74,7 @@ class MainActivity : AppCompatActivity() {
             lifecycleScope.launch(Dispatchers.Default) {
                 when(val response = requestPut()) {
                     is Result.Success<String> -> {
-                        attachLog("PUT", response.toString())
+                        attachResponse(response.data)
                     }
                     else -> {}
                 }
@@ -84,7 +85,7 @@ class MainActivity : AppCompatActivity() {
             lifecycleScope.launch(Dispatchers.Default) {
                 when(val response = requestDELETE()) {
                     is Result.Success<String> -> {
-                        attachLog("DELETE", response.toString())
+                        attachResponse(response.data)
                     }
                     else -> {}
                 }
@@ -92,16 +93,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun attachLog(
-        type: String,
-        log: String?
+    private fun attachResponse(
+        response: String?
     ) {
-        binding.textviewLog.text = "$type $log"
+        lifecycleScope.launch(Dispatchers.Main) {
+            val gson = GsonBuilder().setPrettyPrinting().create()
+            binding.textviewLog.text =
+                gson.toJson(JsonParser.parseString(response))
+        }
     }
 
     private suspend fun requestGet(): Result<String> {
         return withContext(Dispatchers.IO) {
-            request.requestGET(path = "get/test").build()
+            request.requestGET(path = "get?foo1=bar1&foo2=bar2").build()
         }
     }
 
@@ -112,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 
         return withContext(Dispatchers.IO) {
             request.requestPOST(
-                path = "post/test",
+                path = "post",
                 params = params
             )
                 .build()
@@ -122,7 +126,7 @@ class MainActivity : AppCompatActivity() {
     private suspend fun requestPut(): Result<String> {
         return withContext(Dispatchers.IO) {
             request.requestPUT(
-                path = "put/test"
+                path = "put"
             )
                 .addParam("key1", "value1")
                 .addParam("key2", "value2")
@@ -132,7 +136,7 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun requestDELETE(): Result<String> {
         return withContext(Dispatchers.IO) {
-            request.requestDELETE(path = "delete/test")
+            request.requestDELETE(path = "delete")
                 .addParam(name = "key1", value = "value1")
                 .addParam(name = "key2", value = "value2")
         }
@@ -143,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         val filePath = filesDir.path + "/myText.txt"
         writeTextToFile(filePath)
         return withContext(Dispatchers.IO) {
-            request.requestMultiPart(path = "multipart/test")
+            request.requestMultiPart(path = "post")
                 .addFormField(name = "key1", value = "value1")
                 .addFormField(name = "key2", value = "value2")
                 .addFilePart(name ="file1", uploadFile = File(filePath))
@@ -151,7 +155,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun writeTextToFile(path: String) {
+    private fun writeTextToFile(path: String) {
         val file = File(path)
         val fileWriter = FileWriter(file, false)
         val bufferedWriter = BufferedWriter(fileWriter)

@@ -39,8 +39,14 @@
         android:layout_height="50dp"
         android:text="REQUEST DELETE"/>
 
-    <TextView
-        android:id="@+id/textview_log"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/textview_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"/>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>
