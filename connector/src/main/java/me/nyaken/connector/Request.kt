@@ -23,45 +23,38 @@ class Request(
     ): GetMethod {
         val conn: HttpURLConnection = httpConnection(URL("$url$path"))
         conn.requestMethod = "GET"
-        conn.doInput = true
-        conn.doOutput = false
 
         return GetMethod(conn)
     }
 
     fun requestPOST(
         path: String,
-        postDataParams: JSONObject? = null
+        params: JSONObject? = null
     ): PostMethod {
         val conn: HttpURLConnection = httpConnection(URL("$url$path"))
         conn.requestMethod = "POST"
-        conn.doInput = true
-        conn.doOutput = true
 
-        return PostMethod(conn, postDataParams ?: JSONObject())
+        return PostMethod(conn, params ?: JSONObject())
     }
 
     fun requestPUT(
         path: String,
-        postDataParams: JSONObject? = null
+        params: JSONObject? = null
     ): PostMethod {
         val conn: HttpURLConnection = httpConnection(URL("$url$path"))
         conn.requestMethod = "PUT"
-        conn.doInput = true
-        conn.doOutput = false
 
-        return PostMethod(conn, postDataParams ?: JSONObject())
+        return PostMethod(conn, params ?: JSONObject())
     }
 
     fun requestDELETE(
-        path: String
-    ): GetMethod {
+        path: String,
+        params: JSONObject? = null
+    ): PostMethod {
         val conn: HttpURLConnection = httpConnection(URL("$url$path"))
         conn.requestMethod = "DELETE"
-        conn.doInput = true
-        conn.doOutput = false
 
-        return GetMethod(conn)
+        return PostMethod(conn, params ?: JSONObject())
     }
 
     fun requestMultiPart(
@@ -70,9 +63,8 @@ class Request(
         val boundary: String = UUID.randomUUID().toString()
         val conn: HttpURLConnection = httpConnection(URL("$url$path"))
         conn.requestMethod = "POST"
-        conn.doInput = true
-        conn.doOutput = true
         conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
+
         return PostMultipartMethod(conn, boundary)
     }
 

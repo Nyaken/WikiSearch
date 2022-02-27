@@ -1,18 +1,29 @@
 package me.nyaken.connector.method
 
-import android.util.Log
-import me.nyaken.connector.Request
 import me.nyaken.connector.Result
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
-import java.net.URL
 
 abstract class BaseMethod(
     private val conn: HttpURLConnection
 ) {
-    protected var outputStream: OutputStream = conn.outputStream
-    protected var writer: BufferedWriter = BufferedWriter(OutputStreamWriter(outputStream, "UTF-8"))
+    protected lateinit var outputStream: OutputStream
+    protected lateinit var writer: BufferedWriter
+
+    init {
+        when(conn.requestMethod) {
+            "GET" -> {
+                conn.doInput = true
+                conn.doOutput = false
+            } else -> {
+                conn.doInput = true
+                conn.doOutput = true
+                outputStream = conn.outputStream
+                writer = BufferedWriter(OutputStreamWriter(outputStream, "UTF-8"))
+            }
+        }
+    }
 
     open fun build(): Result<String> {
         return try {

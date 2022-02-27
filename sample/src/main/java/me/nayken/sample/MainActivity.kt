@@ -12,10 +12,14 @@ import me.nyaken.connector.Result
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
+    private val testBasedUrl = "https://webhook.site/caeaf4a0-3407-4b8e-b7ab-277bc1a65bbe/"
+    //https://webhook.site/#!/caeaf4a0-3407-4b8e-b7ab-277bc1a65bbe/ecd25428-720e-400c-b481-1b83fa09e2e2/1
+
     private lateinit var binding: ActivityMainBinding
+
     private val request: Request by lazy {
         Request.Builder()
-            .url("https://webhook.site/caeaf4a0-3407-4b8e-b7ab-277bc1a65bbe/")
+            .url(testBasedUrl)
             .connectTimeout(10000)
             .readTimeOut(10000)
             .addHeader("Content-Type", "application/json")
@@ -106,7 +110,7 @@ class MainActivity : AppCompatActivity() {
         return withContext(Dispatchers.IO) {
             request.requestPOST(
                 path = "post/test",
-                postDataParams = params
+                params = params
             )
                 .build()
         }
@@ -126,6 +130,8 @@ class MainActivity : AppCompatActivity() {
     private suspend fun requestDELETE(): Result<String> {
         return withContext(Dispatchers.IO) {
             request.requestDELETE(path = "delete/test")
+                .addParam(name = "key1", value = "value1")
+                .addParam(name = "key2", value = "value2")
         }
             .build()
     }

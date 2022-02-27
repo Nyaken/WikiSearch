@@ -4,5 +4,4 @@ import java.net.HttpURLConnection
 
 class GetMethod(
     conn: HttpURLConnection
-): BaseMethod(conn) {
-}
+): BaseMethod(conn)
