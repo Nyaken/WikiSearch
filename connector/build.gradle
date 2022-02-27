@@ -37,11 +37,11 @@ task deleteJar(type: Delete){
     delete 'release/connectorLibrary.jar'
 }
 
-task exportJar(type: Copy){
-    from('build/intermediates/packaged-classes/release/')
+task exportJar(type:Copy){
+    from('build/intermediates/aar_main_jar/release/')
     into('release/')
     include('classes.jar')
-    rename('classes.jar', 'connectorLibrary.jar')
+    rename('classes.jar','connectorLibrary.jar')
 }
 
 exportJar.dependsOn(deleteJar, build)
