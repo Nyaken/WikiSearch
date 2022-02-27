@@ -10,6 +10,9 @@ import me.nayken.sample.databinding.ActivityMainBinding
 import me.nyaken.connector.Request
 import me.nyaken.connector.Result
 import org.json.JSONObject
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
 
 class MainActivity : AppCompatActivity() {
     private val testBasedUrl = "https://webhook.site/caeaf4a0-3407-4b8e-b7ab-277bc1a65bbe/"
@@ -137,11 +140,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun requestPostMultipart(): Result<String> {
+        val filePath = filesDir.path + "/myText.txt"
+        writeTextToFile(filePath)
         return withContext(Dispatchers.IO) {
             request.requestMultiPart(path = "multipart/test")
                 .addFormField(name = "key1", value = "value1")
                 .addFormField(name = "key2", value = "value2")
+                .addFilePart(name ="file1", uploadFile = File(filePath))
                 .build()
         }
+    }
+
+    fun writeTextToFile(path: String) {
+        val file = File(path)
+        val fileWriter = FileWriter(file, false)
+        val bufferedWriter = BufferedWriter(fileWriter)
+
+        bufferedWriter.append("Test1\n")
+        bufferedWriter.append("Test2")
+        bufferedWriter.newLine()
+        bufferedWriter.append("Test3\n")
+        bufferedWriter.close()
     }
 }

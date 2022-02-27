@@ -20,10 +20,10 @@ class PostMultipartMethod(
         writer.flush()
     }
 
-    fun addFilePart(fieldName: String, uploadFile: File) = apply  {
+    fun addFilePart(name: String, uploadFile: File) = apply  {
         val fileName: String = uploadFile.name
         writer.append("--$boundary").append("\r\n")
-        writer.append("Content-Disposition: form-data; name=\"$fieldName\"; filename=\"$fileName\"")
+        writer.append("Content-Disposition: form-data; name=\"$name\"; filename=\"$fileName\"")
         writer.append("\r\n")
         writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName))
         writer.append("\r\n")
