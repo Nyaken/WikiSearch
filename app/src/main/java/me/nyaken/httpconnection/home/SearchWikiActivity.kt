@@ -69,6 +69,7 @@ class SearchWikiActivity: BaseActivity<ActivitySearchWikiBinding>(R.layout.activ
             onRefresh()
         }
 
+        binding.list.emptyView = binding.textviewEmpty
         binding.list.adapter = adapter
         binding.list.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
             if(position == 0) {
